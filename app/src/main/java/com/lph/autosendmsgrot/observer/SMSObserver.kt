@@ -1,6 +1,5 @@
 package com.lph.autosendmsgrot.observer
 
-import android.R.attr.data
 import android.content.ContentResolver
 import android.content.Context
 import android.database.ContentObserver
@@ -24,7 +23,7 @@ class SMSObserver(var resolver: ContentResolver, var handler: SMSHandler, var co
         handler
     ) {
 
-
+    var lastMsgId="0"
     override fun onChange(selfChange: Boolean) {
         super.onChange(selfChange)
 
@@ -63,28 +62,32 @@ class SMSObserver(var resolver: ContentResolver, var handler: SMSHandler, var co
                 }
                 Log.i("得到短信:", smsinfo.toString())
 
-                if (smsinfo.smsBody.contains("百度") and smsinfo.smsBody.contains("验证码")){
+                if (smsinfo.id!=lastMsgId&&smsinfo.smsBody.contains("百度") && smsinfo.smsBody.contains("验证码")) {
+                    lastMsgId = smsinfo.id
                     val dingTalkBean = DingTalkBean()
                     dingTalkBean.link.apply {
                         title = "百度网盘验证码为: ${smsinfo.smsBody.getVerifyCode(6)}"
                         text = smsinfo.smsBody
                     }
                     val toJson = Gson().toJson(dingTalkBean)
-                    val body: RequestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), toJson)
+                    val body: RequestBody = RequestBody.create(
+                        MediaType.parse("application/json; charset=utf-8"),
+                        toJson
+                    )
                     OkGo.post<String>("https://oapi.dingtalk.com/robot/send?access_token=15907ca2c75acf5aad03226e08b3881858647f7be868e3bf8e59abcf7d739c38") //
                         .tag(this) //
                         .upRequestBody(body)
                         .execute(object : StringCallback() {
                             override fun onSuccess(response: Response<String?>?) {
-                                Log.e("response","onSuccess");
+                                Log.e("response", "onSuccess");
                             }
 
                             override fun onError(response: Response<String?>?) {
-                                Log.e("response","onError");
+                                Log.e("response", "onError");
                             }
                         })
                 }
-                }
+            }
 
         }
 
