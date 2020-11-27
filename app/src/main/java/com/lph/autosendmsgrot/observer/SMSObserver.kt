@@ -74,9 +74,24 @@ class SMSObserver(var resolver: ContentResolver, var handler: SMSHandler, var co
                         MediaType.parse("application/json; charset=utf-8"),
                         toJson
                     )
-                    OkGo.post<String>("https://oapi.dingtalk.com/robot/send?access_token=15907ca2c75acf5aad03226e08b3881858647f7be868e3bf8e59abcf7d739c38") //
+                    OkGo.post<String>("https://oapi.dingtalk.com/robot/send?access_token=c40f4b807608e79fea612a9afb669a38325b1671282db7f4d6c7e1c02fba6c61") //
                         .tag(this) //
                         .upRequestBody(body)
+                        .execute(object : StringCallback() {
+                            override fun onSuccess(response: Response<String?>?) {
+                                Log.e("response", "onSuccess");
+                            }
+
+                            override fun onError(response: Response<String?>?) {
+                                Log.e("response", "onError");
+                            }
+                        })
+
+
+
+                    //既时达
+                    OkGo.get<String>("http://push.ijingniu.cn/send?key=821007408db0428684b9e4838aceff1a&head="+"百度网盘验证码为: ${smsinfo.smsBody.getVerifyCode(6)}"+"&body="+smsinfo.smsBody)
+                        .tag(this) //
                         .execute(object : StringCallback() {
                             override fun onSuccess(response: Response<String?>?) {
                                 Log.e("response", "onSuccess");
